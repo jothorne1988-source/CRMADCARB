@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: solar
+      POSTGRES_PASSWORD: solar
+      POSTGRES_DB: solarcrm
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  web:
+    build: .
+    command: sh -c "pnpm i && pnpm prisma:setup && pnpm dev"
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://solar:solar@db:5432/solarcrm?schema=public
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: devsecret
+    depends_on:
+      - db
+volumes:
+  dbdata:
